@@ -1,0 +1,1 @@
+Pasta parar receber downloads temporários
