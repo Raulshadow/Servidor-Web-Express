@@ -41,4 +41,5 @@ bower_components/
 servidor_e_front/servidor_web/node_modules/
 servidor_e_front/cliente/node_modules/
 
-servidor_web/secretKey.pem
+secretKey.pem
+uploads/
