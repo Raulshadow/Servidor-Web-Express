@@ -42,3 +42,4 @@ servidor_e_front/servidor_web/node_modules/
 servidor_e_front/cliente/node_modules/
 
 secretKey.pem
+uploads/
