@@ -213,11 +213,13 @@ app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => 
 
 app.post('/api/template/:competicaoId', async (req, res) => {
     const competicaoID = req.params.competicaoId;
+    const language = req.body.language || 'python'; // Obtendo a linguagem do corpo da requisição
 
     try {
         // Fazer a requisição para o endpoint externo com os parâmetros
-        const response = await axios.post('http://4.228.0.168:3001/template', null, {
-            params: { competicao: competicaoID }
+        const response = await axios.post('http://4.228.0.168:3001/template', {
+            competicao: competicaoID,
+            //language: language
         });
 
         console.log('Resposta do servidor:', response.data);
@@ -226,7 +228,6 @@ app.post('/api/template/:competicaoId', async (req, res) => {
         const code = response.data; // Supondo que a resposta é o código-fonte como texto
 
         // Define a extensão do arquivo com base na linguagem
-        const language = req.query.language || 'python'; // Por exemplo, 'python' ou 'csharp'
         const fileExtension = language === 'csharp' ? '.cs' : '.py';
         const fileName = `template${fileExtension}`;
 
