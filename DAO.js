@@ -84,25 +84,6 @@ class DAO {
         }
     }
 
-    async get_competicoes_ontem() {
-        try {
-            // Obter a data de ontem
-            const yesterday = subDays(new Date(), 1);
-            const formattedDate = format(yesterday, 'yyyy-MM-dd');
-    
-            const request = new sql.Request();
-            const result = await request.query(`
-                SELECT * 
-                FROM Competicao
-                WHERE CAST(Data_fim AS DATE) = CAST('${formattedDate}' AS DATE);
-            `);
-            return result.recordset;
-        } catch (error) {
-            console.error('Erro ao obter competições com Data_fim igual a ontem:', error);
-            throw error;
-        }
-    }
-
     async get_competicao(ID) {
         // Retorna os dados da competição
         try {
@@ -121,6 +102,26 @@ class DAO {
             return null;
         } catch (error) {
             console.error(TAG + 'Erro ao obter a competição', error);
+            throw error;
+        }
+    }
+
+    async get_competicoes_ontem() {
+        try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
+            // Obter a data de ontem
+            const yesterday = subDays(new Date(), 1);
+            const formattedDate = format(yesterday, 'yyyy-MM-dd');
+    
+            const request = new sql.Request();
+            const result = await request.query(`
+                SELECT * 
+                FROM Competicao
+                WHERE CAST(Data_fim AS DATE) = CAST('${formattedDate}' AS DATE);
+            `);
+            return result.recordset;
+        } catch (error) {
+            console.error('Erro ao obter competições com Data_fim igual a ontem:', error);
             throw error;
         }
     }

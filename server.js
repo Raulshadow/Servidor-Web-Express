@@ -251,7 +251,7 @@ app.post('/api/template/:competicaoId', async (req, res) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on PORT: ${PORT}`);
-    checkCompeticoes();
-    //setInterval(checkCompeticoes, 86400000); // 60000 = 1 minuto ; 86400000 = 24hrs
+    checkCompeticoes(dao);
+    setInterval(checkCompeticoes, 86400000); // 60000 = 1 minuto ; 86400000 = 24hrs
 });
 
