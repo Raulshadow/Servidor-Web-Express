@@ -11,6 +11,7 @@
   "author": "Raul Miguel",
   "license": "ISC",
   "dependencies": {
+    "archiver": "^7.0.1",
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "date-fns": "^3.6.0",

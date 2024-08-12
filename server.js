@@ -10,6 +10,7 @@ const PORT = 8080;
 const DAO = require('./DAO');
 const multer = require('multer');
 const fs = require('fs');
+const { default: axios } = require('axios');
 
 const dao = new DAO();
 // Carrega a chave privada do arquivo PEM
@@ -207,6 +208,43 @@ app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => 
                 console.error('Erro ao tentar remover o arquivo temporário:', unlinkError);
             }
         }
+    }
+});
+
+app.post('/api/template/:competicaoId', async (req, res) => {
+    const competicaoID = req.params.competicaoId;
+
+    try {
+        // Fazer a requisição para o endpoint externo com os parâmetros
+        const response = await axios.post('http://4.228.0.168:3001/template', null, {
+            params: { competicao: competicaoID }
+        });
+
+        console.log('Resposta do servidor:', response.data);
+
+        // Obtendo o código-fonte da resposta
+        const code = response.data; // Supondo que a resposta é o código-fonte como texto
+
+        // Define a extensão do arquivo com base na linguagem
+        const language = req.query.language || 'python'; // Por exemplo, 'python' ou 'csharp'
+        const fileExtension = language === 'csharp' ? '.cs' : '.py';
+        const fileName = `template${fileExtension}`;
+
+        // Cria um arquivo ZIP em memória
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        res.attachment('template.zip'); // Nome do arquivo ZIP que será enviado ao cliente
+
+        archive.pipe(res);
+
+        // Adiciona o arquivo ao ZIP
+        archive.append(code, { name: fileName });
+
+        // Finaliza o arquivo ZIP
+        await archive.finalize();
+    } catch (error) {
+        console.error('Erro ao criar template:', error);
+        res.status(500).send('Erro ao criar template');
     }
 });
 
