@@ -220,7 +220,7 @@ app.post('/api/template/:competicaoId', async (req, res) => {
         const response = await axios.get('http://4.228.0.168:3001/template', {
             params: {
                 competicao: competicaoID,
-                language: language
+                //language: language
             }
         });
 
