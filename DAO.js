@@ -129,6 +129,7 @@ class DAO {
     async get_all_competitions() {
         // Retorna todas as competições
         try {
+            await sql.connect(sqlConfig); 
             const request = new sql.Request();
             const result = await request.query(`
                 SELECT * FROM Competicao;

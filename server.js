@@ -216,10 +216,12 @@ app.post('/api/template/:competicaoId', async (req, res) => {
     const language = req.body.language || 'python'; // Obtendo a linguagem do corpo da requisição
 
     try {
-        // Fazer a requisição para o endpoint externo com os parâmetros
-        const response = await axios.post('http://4.228.0.168:3001/template', {
-            competicao: competicaoID,
-            //language: language
+        // Fazer a requisição para o endpoint externo usando GET com parâmetros na URL
+        const response = await axios.get('http://4.228.0.168:3001/template', {
+            params: {
+                competicao: competicaoID,
+                language: language
+            }
         });
 
         console.log('Resposta do servidor:', response.data);
