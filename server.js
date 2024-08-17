@@ -2,6 +2,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const app = express();
+const archiver = require('archiver');
 
 const checkCompeticoes = require('./checkCompetitions');
 
@@ -223,8 +224,6 @@ app.post('/api/template/:competicaoId', async (req, res) => {
                 //language: language
             }
         });
-
-        console.log('Resposta do servidor:', response.data);
 
         // Obtendo o código-fonte da resposta
         const code = response.data; // Supondo que a resposta é o código-fonte como texto
