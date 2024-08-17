@@ -217,7 +217,7 @@ app.post('/api/template/:competicaoId', async (req, res) => {
 
     try {
         // Fazer a requisição para o endpoint externo usando GET com parâmetros na URL
-        const response = await axios.get('http://4.157.222.169:3001/template', {
+        const response = await axios.get('http://40.88.251.186:3001/template', {
             params: {
                 competicao: competicaoID,
                 //language: language
