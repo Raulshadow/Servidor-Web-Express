@@ -248,54 +248,52 @@ class DAO {
 
 
     async salvarSubmissao(usuarioId, competicaoId, codigoSubmissao) {
-        // Salva ou atualiza a submissao para uma competicao
         try {
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, usuarioId);
             request.input('Competicao_ID', sql.Int, competicaoId);
             request.input('Codigo', sql.NVarChar, codigoSubmissao);
-
+    
             // Verificar se já existe uma submissão para o usuário e competição específicos
             const checkResult = await request.query(`
                 SELECT id FROM submissao 
                 WHERE Usuario_ID = @Usuario_ID 
                 AND Competicao_ID = @Competicao_ID;
             `);
-
+    
             if (checkResult.recordset.length > 0) {
                 // Se a submissão já existe, atualizar a submissão existente
                 const submissionId = checkResult.recordset[0].id;
-
-                const updateResult = await request.query(`
+    
+                // Definir o Submission_ID como um parâmetro de input
+                request.input('Submission_ID', sql.Int, submissionId);
+    
+                await request.query(`
                     UPDATE submissao 
                     SET codigo = @Codigo, 
                         data_submissao = CURRENT_TIMESTAMP, 
                         status_submissao = 'Aguardando Execução'
                     WHERE id = @Submission_ID;
                 `);
-
-                // Após a atualização, obter o id da submissão atualizada
-                const getIdResult = await request.query(`
-                        SELECT id FROM submissao WHERE id = @Submission_ID;
-                    `, {
-                    Submission_ID: submissionId
-                });
-
-                return getIdResult.recordset[0].id;
+    
+                // Retornar o id da submissão atualizada
+                return submissionId;
             } else {
                 // Se a submissão não existe, inserir uma nova submissão
                 const insertResult = await request.query(`
                     INSERT INTO submissao (Usuario_ID, Competicao_ID, codigo, data_submissao, status_submissao) 
-                    VALUES (@Usuario_ID, @Competicao_ID, @Codigo, CURRENT_TIMESTAMP, 'Aguardando Execução')
-                    RETURNING id;
+                    VALUES (@Usuario_ID, @Competicao_ID, @Codigo, CURRENT_TIMESTAMP, 'Aguardando Execução');
+                    
+                    SELECT SCOPE_IDENTITY() AS id;
                 `);
+    
                 return insertResult.recordset[0].id;
             }
         } catch (err) {
-            console.error(TAG + 'Erro ao salvar submissão:', err);
+            console.error('Erro ao salvar submissão:', err);
             throw err;
         }
-    }
+    }    
 
 }
 
