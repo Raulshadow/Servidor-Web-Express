@@ -227,21 +227,35 @@ class DAO {
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, usuario_id);
             request.input('Competicao_ID', sql.Int, competicao_id);
-
+    
             const result = await request.query(`
-                SELECT TOP 1 * 
-                FROM submissao 
-                WHERE Usuario_ID = @Usuario_ID 
-                AND Competicao_ID = @Competicao_ID
-                ORDER BY data_submissao DESC;
+                SELECT TOP 1
+                    s.ID AS Submissao_ID,
+                    s.Usuario_ID,
+                    s.Competicao_ID,
+                    s.data_submissao,
+                    s.status_submissao,
+                    p.pontos AS Pontuacao
+                FROM
+                    submissao s
+                LEFT JOIN
+                    gera g ON s.ID = g.submissao_ID
+                LEFT JOIN
+                    partida p ON g.partida_ID = p.ID
+                WHERE
+                    s.Usuario_ID = @Usuario_ID
+                    AND s.Competicao_ID = @Competicao_ID
+                ORDER BY
+                    s.data_submissao DESC;
             `);
+    
             if (result.recordset.length > 0) {
                 return result.recordset[0];
             } else {
                 return null;
             }
         } catch (error) {
-            console.error(TAG + 'Erro ao obter submissão:', error);
+            console.error('Erro ao obter submissão:', error);
             throw error;
         }
     }
