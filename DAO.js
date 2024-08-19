@@ -112,7 +112,7 @@ class DAO {
             // Obter a data de ontem
             const yesterday = subDays(new Date(), 1);
             const formattedDate = format(yesterday, 'yyyy-MM-dd');
-    
+
             const request = new sql.Request();
             const result = await request.query(`
                 SELECT * 
@@ -129,7 +129,7 @@ class DAO {
     async get_all_competitions() {
         // Retorna todas as competições
         try {
-            await sql.connect(sqlConfig); 
+            await sql.connect(sqlConfig);
             const request = new sql.Request();
             const result = await request.query(`
                 SELECT * FROM Competicao;
@@ -271,13 +271,17 @@ class DAO {
                     SET codigo = @Codigo, 
                         data_submissao = CURRENT_TIMESTAMP, 
                         status_submissao = 'Aguardando Execução'
-                    WHERE id = @Submission_ID
-                    RETURNING id;
-                `, {
+                    WHERE id = @Submission_ID;
+                `);
+
+                // Após a atualização, obter o id da submissão atualizada
+                const getIdResult = await request.query(`
+                        SELECT id FROM submissao WHERE id = @Submission_ID;
+                    `, {
                     Submission_ID: submissionId
                 });
 
-                return updateResult.recordset[0].id;
+                return getIdResult.recordset[0].id;
             } else {
                 // Se a submissão não existe, inserir uma nova submissão
                 const insertResult = await request.query(`
