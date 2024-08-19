@@ -192,7 +192,7 @@ app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => 
         // Leia o arquivo e converta-o em uma string
         const fileContent = fs.readFileSync(file_recieved.path, 'utf-8');
         // Armazenando no Banco de Dados
-        await dao.create_submition(usuarioID, competicaoID, fileContent);
+        await dao.salvarSubmissao(usuarioID, competicaoID, fileContent);
 
         // Envie uma resposta de sucesso
         res.send('Arquivo enviado e armazenado com sucesso');
