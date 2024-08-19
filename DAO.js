@@ -91,7 +91,7 @@ class DAO {
             request.input('ID', sql.Int, ID);
 
             const result = await request.query(`
-                SELECT c.nome, c.data_inicio, c.data_fim, c.descricao, j.nome as jogo 
+                SELECT c.ID AS id, c.nome, c.data_inicio, c.data_fim, c.descricao, j.nome as jogo 
                 FROM Competicao c 
                 LEFT JOIN Jogo j on c.jogo_id = j.ID
                 WHERE c.ID = @ID
