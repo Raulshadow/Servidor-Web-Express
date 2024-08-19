@@ -227,7 +227,7 @@ class DAO {
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, usuario_id);
             request.input('Competicao_ID', sql.Int, competicao_id);
-    
+
             const result = await request.query(`
                 SELECT TOP 1
                     s.ID AS Submissao_ID,
@@ -248,9 +248,18 @@ class DAO {
                 ORDER BY
                     s.data_submissao DESC;
             `);
-    
+
             if (result.recordset.length > 0) {
-                return result.recordset[0];
+                const row = result.recordset[0];
+                const submissao = {
+                    id: row.Submissao_ID,
+                    userId: row.Usuario_ID,
+                    competitionId: row.Competicao_ID,
+                    data_submissao: row.data_submissao,
+                    status_submissao: row.status_submissao,
+                    total_pontos: row.Pontuacao
+                };
+                return submissao;
             } else {
                 return null;
             }
@@ -267,21 +276,21 @@ class DAO {
             request.input('Usuario_ID', sql.Int, usuarioId);
             request.input('Competicao_ID', sql.Int, competicaoId);
             request.input('Codigo', sql.NVarChar, codigoSubmissao);
-    
+
             // Verificar se já existe uma submissão para o usuário e competição específicos
             const checkResult = await request.query(`
                 SELECT id FROM submissao 
                 WHERE Usuario_ID = @Usuario_ID 
                 AND Competicao_ID = @Competicao_ID;
             `);
-    
+
             if (checkResult.recordset.length > 0) {
                 // Se a submissão já existe, atualizar a submissão existente
                 const submissionId = checkResult.recordset[0].id;
-    
+
                 // Definir o Submission_ID como um parâmetro de input
                 request.input('Submission_ID', sql.Int, submissionId);
-    
+
                 await request.query(`
                     UPDATE submissao 
                     SET codigo = @Codigo, 
@@ -289,7 +298,7 @@ class DAO {
                         status_submissao = 'Aguardando Execução'
                     WHERE id = @Submission_ID;
                 `);
-    
+
                 // Retornar o id da submissão atualizada
                 return submissionId;
             } else {
@@ -300,14 +309,14 @@ class DAO {
                     
                     SELECT SCOPE_IDENTITY() AS id;
                 `);
-    
+
                 return insertResult.recordset[0].id;
             }
         } catch (err) {
             console.error('Erro ao salvar submissão:', err);
             throw err;
         }
-    }    
+    }
 
 }
 
