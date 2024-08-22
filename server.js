@@ -72,10 +72,10 @@ app.post('/api/login', async (req, res) => {
             if (!resposta.senhaCorreta) {
                 return res.status(401).send('Senha incorreta');
             } else {
-                // Gera o token JWT
-                const token = gerarToken(resposta.ID);
-                //Envia o token juntamente as informações do usuário
                 const usuario = resposta.usuario;
+                // Gera o token JWT
+                const token = gerarToken(usuario.ID);
+                //Envia o token juntamente as informações do usuário
                 return res.json({ usuario, token });
             }
         }
@@ -138,7 +138,7 @@ app.get('/api/competicao/:id', async (req, res) => {
     }
 });
 
-// Rota para realizar a inscrição de um usuário em uma competição
+// Rota para realizar a inscrição de um usuário em uma competição Retorna o ID da competição inserida
 app.post('/api/competicao/:competicaoId/realizarInscricao', async (req, res) => {
     const competicaoID = req.params.competicaoId;
 
@@ -147,7 +147,7 @@ app.post('/api/competicao/:competicaoId/realizarInscricao', async (req, res) => 
         const resultado = await dao.inscrever_usuario(usuarioID, competicaoID);
 
         if (resultado) {
-            return res.status(200).send('Inscrição realizada com sucesso');
+            return res.status(200).send({result:resultado, message:'Inscrição realizada com sucesso'});
         } else {
             return res.status(400).send('Erro ao realizar inscrição');
         }
@@ -167,7 +167,7 @@ app.get('/api/competicao/:competicaoId/checaInscricao', async (req, res) => {
         if (resultado) {
             return res.status(200).send(true);
         } else {
-            return res.status(404).send(false);
+            return res.status(200).send(false);
         }
     } catch (error) {
         console.error('Erro ao verificar inscrição:', error);
