@@ -1,11 +1,16 @@
 const sql = require('mssql');
+const { hashPassword, comparePassword } = require('./authUtils');
 const TAG = "[Jogos_DAO] ";
 const { format, subDays } = require('date-fns');
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config({ path: 'envoirement.env' });
+}
+
 const sqlConfig = {
     user: 'usr_plataforma',
     password: 'competicao01deIA@',
     database: 'plataforma',
-    server: 'aicompetitionplatform.database.windows.net',
+    server: process.env.DATABASE_URL,
     options: {
         encrypt: true, // for azure
         trustServerCertificate: false // change to true for local dev / self-signed certs
@@ -31,7 +36,7 @@ class DAO {
             request.input('ID', sql.Int, id);
 
             const result = await request.query(`
-                SELECT * FROM Usuario WHERE ID = @ID;
+                SELECT ID, email, nome, instituicao FROM Usuario WHERE ID = @ID;
             `);
 
             if (result.recordset.length > 0) {
@@ -46,24 +51,62 @@ class DAO {
         }
     }
 
-    async get_usuario_por_email(email) {
-        // Dado o email do usuário, retorna suas informações
+    async get_usuario_por_email(email, senha) { //login
+        // Dado o email do usuário, retorna suas informações se a senha estiver correta
         try {
             const request = new sql.Request();
             request.input('Email', sql.NVarChar, email);
 
+            // Consulta
             const result = await request.query(`
-                SELECT * FROM Usuario WHERE email = @Email;
+                SELECT ID, email, nome, instituicao, senha 
+                FROM Usuario 
+                WHERE email = @Email;
             `);
 
+            // Verifica se o usuário foi encontrado
             if (result.recordset.length > 0) {
                 const usuario = result.recordset[0];
-                return usuario;
+                const senhaCriptografada = usuario.senha;
+
+                // Verifica se a senha fornecida corresponde
+                const validation = await comparePassword(senha, senhaCriptografada);
+
+                if (validation) {
+                    // Remove a senha do objeto antes de retornar as informações do usuário
+                    delete usuario.senha;
+                    return {usuario: usuario, senhaCorreta: true};
+                } else {
+                    return {usuario: null, senhaCorreta: false};
+                }
             } else {
-                return null;
+                return null; // Retorna null se o usuário não for encontrado
             }
         } catch (error) {
-            console.error(TAG + 'Erro ao obter usuário por email:', error);
+            console.error('Erro ao obter usuário por email:', error);
+            throw error;
+        }
+    }
+
+    async create_usuario(nome, email, instituicao, senha) {
+        // Cria um novo usuário no banco de dados
+        try {
+            const hash = await hashPassword(senha);
+            const request = new sql.Request();
+            request.input('Email', sql.NVarChar, email);
+            request.input('Senha', sql.NVarChar, hash);
+            request.input('Nome', sql.NVarChar, nome);
+            request.input('Instituicao', sql.NVarChar, instituicao);
+
+            const result = await request.query(`
+                INSERT INTO Usuario (email, senha, nome, instituicao) 
+                OUTPUT INSERTED.ID
+                VALUES (@Email, @Senha, @Nome, @Instituicao);
+            `);
+            
+            return result.recordset[0].ID; // Retorna o ID do usuário inserido
+        } catch (error) {
+            console.error(TAG + 'Erro ao criar usuário:', error);
             throw error;
         }
     }
