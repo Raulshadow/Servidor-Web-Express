@@ -244,6 +244,7 @@ app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => 
     }
 });
 
+// Rota para obter o template do código de uma competição
 app.post('/api/template/:competicaoId', async (req, res) => {
     const competicaoID = req.params.competicaoId;
     const language = req.body.language || 'python'; // Obtendo a linguagem do corpo da requisição
@@ -280,6 +281,10 @@ app.post('/api/template/:competicaoId', async (req, res) => {
         console.error('Erro ao criar template:', error);
         res.status(500).send('Erro ao criar template');
     }
+});
+
+app.get('/api/wake-up', async (req, res) => {
+    res.send('Servidor acordado');
 });
 
 app.listen(PORT, () => {
