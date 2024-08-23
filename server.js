@@ -12,6 +12,7 @@ const DAO = require('./DAO');
 const multer = require('multer');
 const fs = require('fs');
 const { default: axios } = require('axios');
+const { tr } = require('date-fns/locale');
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config({ path: 'envoirement.env' });
@@ -89,7 +90,7 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/cadastro', async (req, res) => {
     try {
         const { nome, email, instituicao, senha } = req.body; // Aqui acessamos o corpo da requisição para pegar o nome, email e senha
-        
+
         if (!nome || !email || !senha || !instituicao) {
             return res.status(400).send('Nome, email ou senha não informados');
         }
@@ -123,18 +124,28 @@ app.get('/api/user', async (req, res) => {
 
 // Rota para listagem das competições.
 app.get('/api/competicoes', async (req, res) => {
-    const competicoes = await dao.get_competicoes_disponiveis();
-    return res.json(competicoes);
+    try {
+        const competicoes = await dao.get_competicoes_disponiveis();
+        return res.json(competicoes);
+    } catch (error) {
+        console.error('Erro ao recuperar competições:', error);
+        return res.status(500).send('Erro ao recuperar competições');
+    }
 });
 
 // Rota para obter informações de uma competição específica.
 app.get('/api/competicao/:id', async (req, res) => {
-    const id = req.params.id;
-    const competicao = await dao.get_competicao(id);
-    if (!competicao) {
-        return res.status(404).send('Competição não encontrada');
-    } else {
-        return res.json(competicao);
+    try {
+        const id = req.params.id;
+        const competicao = await dao.get_competicao(id);
+        if (!competicao) {
+            return res.status(404).send('Competição não encontrada');
+        } else {
+            return res.json(competicao);
+        }
+    } catch (error) {
+        console.error('Erro ao recuperar informações da competição:', error);
+        return res.status(500).send('Erro ao recuperar informações da competição');
     }
 });
 
@@ -147,7 +158,7 @@ app.post('/api/competicao/:competicaoId/realizarInscricao', async (req, res) => 
         const resultado = await dao.inscrever_usuario(usuarioID, competicaoID);
 
         if (resultado) {
-            return res.status(200).send({result:resultado, message:'Inscrição realizada com sucesso'});
+            return res.status(200).send({ result: resultado, message: 'Inscrição realizada com sucesso' });
         } else {
             return res.status(400).send('Erro ao realizar inscrição');
         }
@@ -284,6 +295,7 @@ app.post('/api/template/:competicaoId', async (req, res) => {
 });
 
 app.get('/api/wake-up', async (req, res) => {
+    await dao.wake_up();
     res.send('Servidor acordado');
 });
 

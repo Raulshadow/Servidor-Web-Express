@@ -29,9 +29,21 @@ class DAO {
         }
     }
 
+    async wake_up() {
+        // Verifica se o banco de dados está acessível
+        try {
+            await sql.connect(sqlConfig);
+            return true;
+        } catch (error) {
+            console.error(TAG + 'Erro ao acordar:', error);
+            return false;
+        }
+    }
+
     async get_jogador_por_id(id) {
         // Dado o id do jogador, retorna suas informações
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('ID', sql.Int, id);
 
@@ -54,6 +66,7 @@ class DAO {
     async get_usuario_por_email(email, senha) { //login
         // Dado o email do usuário, retorna suas informações se a senha estiver correta
         try {
+            await sql.connect(sqlConfig);
             const request = new sql.Request();
             request.input('Email', sql.NVarChar, email);
 
@@ -91,6 +104,7 @@ class DAO {
     async create_usuario(nome, email, instituicao, senha) {
         // Cria um novo usuário no banco de dados
         try {
+            await sql.connect(sqlConfig);
             const hash = await hashPassword(senha);
             const request = new sql.Request();
             request.input('Email', sql.NVarChar, email);
@@ -113,6 +127,7 @@ class DAO {
 
     async get_competicoes_disponiveis() {
         try {
+            await sql.connect(sqlConfig);
             const request = new sql.Request();
             const result = await request.query(`
                 SELECT * 
@@ -130,6 +145,7 @@ class DAO {
     async get_competicao(ID) {
         // Retorna os dados da competição
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('ID', sql.Int, ID);
 
@@ -187,6 +203,7 @@ class DAO {
     async get_resultados(competicao_id) {
         // Retorna os resultados de determinada competicao ordenados pela pontuação
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('Competicao_ID', sql.Int, competicao_id);
 
@@ -223,6 +240,7 @@ class DAO {
     async inscrever_usuario(Usuario_ID, Competicao_ID) {
         // Inscreve um usuário em uma competição
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const usuarioIdInt = parseInt(Usuario_ID, 10);
             const competicaoIdInt = parseInt(Competicao_ID, 10);
 
@@ -250,6 +268,7 @@ class DAO {
     async checa_inscricao(Usuario_ID, Competicao_ID) {
         // Checa se um usuário está inscrito em uma competição
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, Usuario_ID);
             request.input('Competicao_ID', sql.Int, Competicao_ID);
@@ -267,6 +286,7 @@ class DAO {
     async get_submissao_por_id_usuario_e_competicao(usuario_id, competicao_id) {
         // Retorna a submissão mais recente do usuário para a competição especificada
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, usuario_id);
             request.input('Competicao_ID', sql.Int, competicao_id);
@@ -315,6 +335,7 @@ class DAO {
 
     async salvarSubmissao(usuarioId, competicaoId, codigoSubmissao) {
         try {
+            await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, usuarioId);
             request.input('Competicao_ID', sql.Int, competicaoId);
