@@ -295,10 +295,6 @@ app.post('/api/template/:competicaoId', async (req, res) => {
 });
 
 app.get('/api/wake-up', async (req, res) => {
-    const acordado = await dao.wake_up();
-    if (!acordado) {
-        return res.status(500).send('Erro ao acordar o Banco de Dados');
-    }
     res.status(200).send('Servidor acordado');
 });
 
