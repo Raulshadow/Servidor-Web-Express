@@ -259,13 +259,14 @@ app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => 
 app.post('/api/template/:competicaoId', async (req, res) => {
     const competicaoID = req.params.competicaoId;
     const language = req.body.language || 'python'; // Obtendo a linguagem do corpo da requisição
+    const languageToSend = language === 'csharp' ? 'cs' : 'py';
 
     try {
         // Fazer a requisição para o endpoint externo usando GET com parâmetros na URL
         const response = await axios.get('http://52.149.245.119:3001/template', {
             params: {
                 competicao: competicaoID,
-                //language: language
+                linguagem: languageToSend
             }
         });
 
