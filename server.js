@@ -295,7 +295,13 @@ app.post('/api/template/:competicaoId', async (req, res) => {
 });
 
 app.get('/api/wake-up', async (req, res) => {
-    res.status(200).send('Servidor acordado');
+    try {
+        const resposta = await dao.wake_up();
+        return res.status(200).send('Servidor acordado');
+    } catch (error) {
+        console.error('Erro ao acordar servidor:', error);
+        return res.status(500).send('Erro ao acordar servidor');
+    }
 });
 
 app.listen(PORT, () => {
