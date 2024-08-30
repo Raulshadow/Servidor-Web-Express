@@ -333,13 +333,14 @@ class DAO {
     }
 
 
-    async salvarSubmissao(usuarioId, competicaoId, codigoSubmissao) {
+    async salvarSubmissao(usuarioId, competicaoId, codigoSubmissao, linguagemSubmissao) {
         try {
             await sql.connect(sqlConfig);  // Conectando ao pool de conexões
             const request = new sql.Request();
             request.input('Usuario_ID', sql.Int, usuarioId);
             request.input('Competicao_ID', sql.Int, competicaoId);
             request.input('Codigo', sql.NVarChar, codigoSubmissao);
+            request.input('Linguagem', sql.NVarChar, linguagemSubmissao);
 
             // Verificar se já existe uma submissão para o usuário e competição específicos
             const checkResult = await request.query(`
@@ -359,7 +360,8 @@ class DAO {
                     UPDATE submissao 
                     SET codigo = @Codigo, 
                         data_submissao = CURRENT_TIMESTAMP, 
-                        status_submissao = 'Aguardando Execução'
+                        status_submissao = 'Aguardando Execução',
+                        linguagem = @Linguagem
                     WHERE id = @Submission_ID;
                 `);
 
@@ -368,8 +370,8 @@ class DAO {
             } else {
                 // Se a submissão não existe, inserir uma nova submissão
                 const insertResult = await request.query(`
-                    INSERT INTO submissao (Usuario_ID, Competicao_ID, codigo, data_submissao, status_submissao) 
-                    VALUES (@Usuario_ID, @Competicao_ID, @Codigo, CURRENT_TIMESTAMP, 'Aguardando Execução');
+                    INSERT INTO submissao (Usuario_ID, Competicao_ID, codigo, data_submissao, status_submissao, linguagem) 
+                    VALUES (@Usuario_ID, @Competicao_ID, @Codigo, CURRENT_TIMESTAMP, 'Aguardando Execução', @Linguagem);
                     
                     SELECT SCOPE_IDENTITY() AS id;
                 `);

@@ -12,7 +12,7 @@ const DAO = require('./DAO');
 const multer = require('multer');
 const fs = require('fs');
 const { default: axios } = require('axios');
-const { tr } = require('date-fns/locale');
+const path = require('path');
 
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config({ path: 'envoirement.env' });
@@ -223,6 +223,7 @@ app.post('/api/competicao/resultado', async (req, res) => {
 app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => {
     const competicaoID = req.params.competicaoId;
     const file_recieved = req.files[0];
+    
     try {
         // Verifica o token JWT para obter o ID do usuário
         const usuarioID = parseInt(req.decoded.id);
@@ -232,10 +233,17 @@ app.post('/api/upload/:competicaoId', upload.array('file'), async (req, res) => 
             throw new Error('Nenhum arquivo enviado');
         }
 
+        // Captura a extensão do arquivo
+        const fileExtension = path.extname(file_recieved.originalname).slice(1).toLowerCase();
+        // Verifica se a extensão do arquivo é suportada
+        if (fileExtension !== 'py' && fileExtension !== 'cs') {
+            throw new Error('Extensão de arquivo não suportada');
+        }
+
         // Lê o arquivo e converte-o em uma string
         const fileContent = fs.readFileSync(file_recieved.path, 'utf-8');
         // Armazenando no Banco de Dados
-        await dao.salvarSubmissao(usuarioID, competicaoID, fileContent);
+        await dao.salvarSubmissao(usuarioID, competicaoID, fileContent, fileExtension);
 
         // Envia uma resposta de sucesso
         res.send('Arquivo enviado e armazenado com sucesso');
