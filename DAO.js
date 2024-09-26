@@ -8,7 +8,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 const sqlConfig = {
     user: 'usr_plataforma',
-    password: 'competicao01deIA@',
+    password: process.env.PASSWORD_DB,
     database: 'plataforma',
     server: process.env.DATABASE_URL,
     options: {
@@ -130,10 +130,25 @@ class DAO {
             await sql.connect(sqlConfig);
             const request = new sql.Request();
             const result = await request.query(`
-                SELECT * 
-                FROM Competicao
-                WHERE data_inicio <= GETDATE()
-                AND data_fim > GETDATE();
+                SELECT 
+                    c.ID,
+                    c.Nome,
+                    c.Descricao,
+                    c.Data_inicio,
+                    c.Data_fim,
+                    c.Imagem,
+                    c.Data_ultima_exec,
+                    c.Intervalo_execucao,
+                    c.jogo_id,
+                    c.Criador,
+                    u.nome AS NomeCriador,
+                    c.Regras,
+                    c.Ativa,
+                    j.nome as jogo
+                FROM Competicao c
+                INNER JOIN Usuario u ON c.Criador = u.ID
+                LEFT JOIN Jogo j on c.jogo_id = j.ID
+                WHERE c.Ativa = 1;
             `);
             return result.recordset;
         } catch (error) {
@@ -150,8 +165,9 @@ class DAO {
             request.input('ID', sql.Int, ID);
 
             const result = await request.query(`
-                SELECT c.ID AS id, c.nome, c.data_inicio, c.data_fim, c.descricao, j.nome as jogo 
+                SELECT c.ID AS id, c.nome, c.data_inicio, c.data_fim, c.descricao, c.Regras, c.jogo_id, j.nome as jogo, u.nome AS NomeCriador 
                 FROM Competicao c 
+                INNER JOIN Usuario u ON c.Criador = u.ID
                 LEFT JOIN Jogo j on c.jogo_id = j.ID
                 WHERE c.ID = @ID
             `);
@@ -176,8 +192,9 @@ class DAO {
             const result = await request.query(`
                 SELECT * 
                 FROM Competicao
-                WHERE CAST(Data_fim AS DATE) = CAST('${formattedDate}' AS DATE);
+                WHERE CAST(Data_fim AS DATE) = CAST('${formattedDate}' AS DATE) AND Ativa=1;
             `);
+            
             return result.recordset;
         } catch (error) {
             console.error('Erro ao obter competições com Data_fim igual a ontem:', error);
